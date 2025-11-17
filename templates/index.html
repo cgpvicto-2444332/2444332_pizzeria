@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Connectez-vous</title>
+  </head>
+  <style>
+:root {
+    --couleur-principale-fonce: #ff0000;
+    --couleur-principale-pale: #d8ff00;
+    --couleur-principale-tres-pale: #ff00d5;
+    --couleur-secondaire-fonce: #ffa900;
+    --couleur-secondaire-pale: #e3ff00;
+    --couleur-punch-fonce: #7e1b33;
+    --couleur-punch-pale: #ff00d5;
+}
+
+html {
+    background-color: var(--couleur-secondaire-pale);
+}
+
+.formulaire {
+    background-color: var(--couleur-secondaire-pale);
+}
+
+.formulaire form {
+    margin: auto;
+    background-color: var(--couleur-principale-tres-pale);
+    display: flex;
+    flex-direction: column;
+    width: 97%;
+    padding: 20px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+}
+
+.formulaire input, select, textarea, .boutton-formulaire {
+    font-size: 16px;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 4px;
+}
+
+.boutton-formulaire {
+    margin-top: 15px;
+    padding: 10px;
+    font-size: 18px;
+    color: #fff;
+    background-color: var(--couleur-principale-fonce);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.boutton-formulaire:hover {
+    background-color: #2f8f00;
+}
+  </style>
+  <body>
+    <div id="formulaire-commande" class="formulaire">
+        <h1>Formulaire de commande</h1>
+        <form action="/commander" method="POST">
+            
+            <label for="nom">Nom de famille :</label> <br>
+            <input type="text" id="nom" name="nom" required> <br>
+
+            <label for="prenom">Prénom :</label> <br>
+            <input type="text" id="prenom" name="prenom" required> <br>
+
+            <label for="telephone">Numéro de téléphone :</label> <br>
+            <input type="text" id="telephone" name="telephone"> <br>
+
+            <label for="adresse">Adresse :</label> <br>
+            <input type="text" id="adresse" name="adresse"> <br> 
+
+            <label for="croute">Type de croutes :</label> <br>
+            <select id="id" name="type_croute" autofocus>
+                {% for id, type_croute in croutes %}
+                <option value="{{ id }}">{{ type_croute }}</option>
+                {% endfor %}
+            </select> <br>
+
+            <label for="sauce">Type de sauce :</label> <br>
+            <select id="id" name="nom_sauce" autofocus>
+                {% for id, nom_sauce in sauces %}
+                <option value="{{ id }}">{{ nom_sauce }}</option>
+                {% endfor %}
+            </select> <br>
+
+            <label for="garniture1">Type de garnitures :</label> <br>
+            <select id="id" name="garniture1" autofocus>
+                <option value=''>Choisissez une garniture</option>
+                {% for id, nom_garniture in garnitures %}
+                <option value="{{ id }}">{{ nom_garniture }}</option>
+                {% endfor %}
+            </select> <br>
+
+            <label for="garniture2">Type de garnitures :</label> <br>
+            <select id="id" name="garniture2" autofocus>
+                <option value=''>Choisissez une garniture</option>
+                {% for id, nom_garniture in garnitures %}
+                <option value="{{ id }}">{{ nom_garniture }}</option>
+                {% endfor %}
+            </select> <br>
+            
+            <label for="garniture3">Type de garnitures :</label> <br>
+            <select id="id" name="garniture3" autofocus>
+                <option value=''>Choisissez une garniture</option>
+                {% for id, nom_garniture in garnitures %}
+                <option value="{{ id }}">{{ nom_garniture }}</option>
+                {% endfor %}
+            </select> <br>
+
+            <label for="garniture4">Type de garnitures :</label> <br>
+            <select id="id" name="garniture4" autofocus>
+                <option value=''>Choisissez une garniture</option>
+                {% for id, nom_garniture in garnitures %}
+                <option value="{{ id }}">{{ nom_garniture }}</option>
+                {% endfor %}
+            </select> <br>
+            
+            <button class="boutton-formulaire" type="submit">Commander</button>
+            
+        </form>
+    </div>
+  </body>
+</html>

@@ -15,8 +15,7 @@ CREATE TABLE clients (
 	id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(50) NOT NULL,
     prenom VARCHAR(50) NOT NULL,
-    numero_telephone VARCHAR(20) NOT NULL UNIQUE,
-    adresse VARCHAR (255) NOT NULL
+    numero_telephone VARCHAR(20) NOT NULL UNIQUE
 );
 
 CREATE TABLE commandes (
@@ -24,7 +23,7 @@ CREATE TABLE commandes (
     id_client INT NOT NULL,
     date_commande DATETIME NOT NULL,
     date_livraison DATETIME,
-    statut ENUM('en préparation', 'en attente de livraison', 'livrée') NOT NULL,
+	adresse VARCHAR (255) NOT NULL,
     FOREIGN KEY (id_client) REFERENCES clients (id)
 );
 
@@ -61,6 +60,20 @@ CREATE TABLE garnitures_pizzas (
     FOREIGN KEY (id_garniture) REFERENCES garnitures(id)
 );
 
+CREATE TABLE attente_livraisons (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    id_commande INT NOT NULL,
+    FOREIGN KEY (id_commande) REFERENCES commandes (id)
+);
+
+
+
+/*******************************************************************************/
+/**************************** Insertions ***************************************/
+/*******************************************************************************/
+
+
+
 INSERT INTO croutes (type_croute)
 	VALUES 
 		('Classique'),
@@ -86,9 +99,5 @@ INSERT INTO garnitures (nom_garniture)
         ('Maïs'),
         ('Fromage'),
         ('Piments forts');	
-        
-SELECT * FROM croutes;
-SELECT * FROM sauces;
-SELECT * FROM garnitures;
-        
         #Pepperoni, Champignons, Oignons, Poivrons, Olives, Anchois, Bacon, Poulet, Maïs, Fromage, Piments forts
+	
