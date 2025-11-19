@@ -47,6 +47,75 @@ def index():
     
     return render_template('index.html', croutes=croutes, sauces=sauces, garnitures=garnitures)
 
+@app.route('/confirmation', methods=['POST'])
+def confirmation():
+    # Connexion à la base de données
+    db = db_config()
+    cursor = db.cursor()
+    
+    # Récupérer les données du formulaire
+    nom = request.form['nom']
+    prenom = request.form['prenom']
+    telephone = request.form['telephone']
+    adresse = request.form['adresse']
+    croute_id = request.form['croute']
+    sauce_id = request.form['sauce']
+    
+    # Récupérer les garnitures sélectionnées
+    garniture1 = request.form.get('garniture1', '')
+    garniture2 = request.form.get('garniture2', '')
+    garniture3 = request.form.get('garniture3', '')
+    garniture4 = request.form.get('garniture4', '')
+    garnitures_ids = [g for g in [garniture1, garniture2, garniture3, garniture4] if g]
+    
+    # Récupérer le nom de la croûte depuis la base de données
+    sql_croute = "SELECT type_croute FROM croutes WHERE id = %s"
+    cursor.execute(sql_croute, (croute_id,))
+    croute_result = cursor.fetchone()
+    croute_nom = croute_result[0] if croute_result else "Non trouvée"
+    
+    # Récupérer le nom de la sauce depuis la base de données
+    sql_sauce = "SELECT nom_sauce FROM sauces WHERE id = %s"
+    cursor.execute(sql_sauce, (sauce_id,))
+    sauce_result = cursor.fetchone()
+    sauce_nom = sauce_result[0] if sauce_result else "Non trouvée"
+    
+    # Récupérer les noms des garnitures depuis la base de données
+    garnitures_details = []
+    for garniture_id in garnitures_ids:
+        if garniture_id:
+            sql_garniture = "SELECT nom_garniture FROM garnitures WHERE id = %s"
+            cursor.execute(sql_garniture, (garniture_id,))
+            
+            garniture_resultat = cursor.fetchone()
+            
+            if garniture_resultat:
+                nom_garniture = garniture_resultat[0]
+                
+                garnitures_details.append({
+                    'id': garniture_id,
+                    'nom': nom_garniture
+                })
+    
+    # Fermeture du curseur et de la connexion
+    cursor.close()
+    db.close()
+    
+    # Préparer les données de la commande pour l'affichage
+    commande_details = {
+        'nom': nom,
+        'prenom': prenom,
+        'telephone': telephone,
+        'adresse': adresse,
+        'croute': {'id': croute_id, 'nom': croute_nom},
+        'sauce': {'id': sauce_id, 'nom': sauce_nom},
+        'garnitures': garnitures_details
+    }
+    
+    # Afficher la page de confirmation avec les données
+    return render_template('confirmation.html', commande=commande_details)
+
+
 @app.route('/commander', methods=['POST'])
 def commander():
     db = db_config()
@@ -56,6 +125,17 @@ def commander():
         prenom = request.form['prenom']
         telephone = request.form['telephone']
         adresse = request.form['adresse']
+        croute = request.form['croute']
+        sauce = request.form['sauce']
+        
+        # Récupérer les garnitures (avec .get() pour éviter les erreurs si le champ est absent)
+        garniture1 = request.form.get('garniture1', '')
+        garniture2 = request.form.get('garniture2', '')
+        garniture3 = request.form.get('garniture3', '')
+        garniture4 = request.form.get('garniture4', '')
+
+        # Créer la liste des garnitures et filtrer les valeurs vides
+        garnitures = [g for g in [garniture1, garniture2, garniture3, garniture4] if g]
         
         # Créer un curseur
         cursor = db.cursor()
@@ -77,11 +157,28 @@ def commander():
                 client_id = cursor.lastrowid
             
             date_commande = datetime.now()
-            sqlCommandes = "INSERT INTO commandes (id_client, date_commande, adresse) VALUES (%s, %s, %s)"
+
+            sqlCommande = "INSERT INTO commandes (id_client, date_commande, adresse) VALUES (%s, %s, %s)"
             values = (client_id, date_commande, adresse)
-            cursor.execute(sqlCommandes, values)
+
+            cursor.execute(sqlCommande, values)
             db.commit()
             commande_id = cursor.lastrowid
+
+            sqlPizza = "INSERT INTO pizzas (id_commande, id_croute, id_sauce) VALUES (%s, %s, %s)"
+            values = (commande_id, croute, sauce)
+
+            cursor.execute(sqlPizza, values)
+            db.commit()
+            pizza_id = cursor.lastrowid
+
+            if garnitures:
+                sqlGarnitures = "INSERT INTO garnitures_pizzas (id_pizza, id_garniture) VALUES (%s, %s)"
+                values_garnitures = [(pizza_id, g) for g in garnitures]
+                cursor.executemany(sqlGarnitures, values_garnitures)
+            
+            # Commit une seule fois à la fin
+            db.commit()
             
         except mysql.connector.Error as err:
             db.rollback()  # Annuler en cas d'erreur
@@ -96,6 +193,42 @@ def commander():
     
     # Si GET, afficher le formulaire
     return render_template('index.html')
+
+@app.route('/commandes_en_attente')
+def commandes_en_attente():
+    db = db_config()
+    cursor = db.cursor()
+    
+    # Requête pour récupérer toutes les commandes avec les détails (les 3 guillemets pour pas avoir a tout mettre sa meme ligne)
+    sql = """
+        SELECT 
+            cmd.id,
+            cmd.date_commande,
+            cmd.adresse,
+            cl.nom,
+            cl.prenom,
+            cl.numero_telephone,
+            cr.type_croute,
+            s.nom_sauce,
+            GROUP_CONCAT(g.nom_garniture SEPARATOR ', ') as garnitures
+        FROM commandes cmd
+        JOIN clients cl ON cmd.id_client = cl.id
+        JOIN pizzas p ON p.id_commande = cmd.id
+        JOIN croutes cr ON p.id_croute = cr.id
+        JOIN sauces s ON p.id_sauce = s.id
+        LEFT JOIN garnitures_pizzas gp ON gp.id_pizza = p.id
+        LEFT JOIN garnitures g ON gp.id_garniture = g.id
+        GROUP BY cmd.id, cmd.date_commande, cmd.adresse, cl.nom, cl.prenom, cl.numero_telephone, cr.type_croute, s.nom_sauce
+        ORDER BY cmd.date_commande
+    """
+    
+    cursor.execute(sql)
+    commandes = cursor.fetchall()
+    
+    cursor.close()
+    db.close()
+    
+    return render_template('commandes-en-attente.html', commandes=commandes)
 
 if __name__ == '__main__':
     app.run(debug=True)

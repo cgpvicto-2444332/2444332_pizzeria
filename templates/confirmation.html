@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de commande</title>
+    <style>
+        :root {
+            --couleur-principale-fonce: #ff0000;
+            --couleur-principale-pale: #d8ff00;
+            --couleur-principale-tres-pale: #ff00d5;
+            --couleur-secondaire-fonce: #ffa900;
+            --couleur-secondaire-pale: #e3ff00;
+            --couleur-punch-fonce: #7e1b33;
+            --couleur-punch-pale: #ff00d5;
+        }
+
+        /* Styles globaux pour l'ambiance générale (Neon/Shocking) */
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--couleur-secondaire-pale); /* Fond Jaune Néon */
+            color: #000;
+        }
+
+        /* Conteneur principal de confirmation */
+        .confirmation-box {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: var(--couleur-principale-tres-pale); /* Fond Rose/Magenta Vif */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border: 3px solid var(--couleur-principale-fonce); /* Bordure Rouge */
+        }
+
+        h1 {
+            color: var(--couleur-punch-fonce); /* Titre Marron Foncé */
+            text-align: center;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 0 var(--couleur-principale-fonce); /* Ombre rouge */
+            font-size: 2.2em;
+        }
+
+        /* Style des sections (Client, Pizza) */
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: var(--couleur-principale-pale); /* Fond Jaune-Vert Néon */
+            border-radius: 8px;
+            border-left: 8px solid var(--couleur-secondaire-fonce); /* Barre Orange Accentuée */
+        }
+
+        h3 {
+            color: var(--couleur-principale-fonce); /* Sous-titre Rouge */
+            border-bottom: 2px dashed var(--couleur-punch-fonce);
+            padding-bottom: 5px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        /* Lignes d'information */
+        .info-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 7px 0;
+            border-bottom: 1px dotted rgba(0, 0, 0, 0.2);
+        }
+
+        .info-line:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: bold;
+            color: var(--couleur-punch-fonce); /* Texte Marron Foncé */
+            flex-shrink: 0; /* Empêche le label de rétrécir */
+            padding-right: 15px;
+        }
+
+        .value, .info-line > div {
+            font-weight: normal;
+            text-align: right;
+            color: #000;
+            flex-grow: 1;
+        }
+        
+        .info-line > div {
+            /* S'assure que les garnitures sont alignées à droite */
+            display: flex;
+            flex-direction: column; 
+            align-items: flex-end;
+        }
+
+        .garniture-item {
+            display: inline-block;
+            background-color: var(--couleur-secondaire-fonce); /* Patch Orange pour garniture */
+            color: #fff;
+            padding: 3px 8px;
+            margin: 2px 0 2px 5px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        /* Boutons */
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+
+        .buttons button {
+            padding: 12px 20px;
+            font-size: 18px;
+            border: 2px solid var(--couleur-punch-fonce);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            flex-grow: 1;
+            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 0 var(--couleur-punch-fonce);
+            letter-spacing: 0.5px;
+        }
+        
+        /* Bouton Modifier (Annuler) */
+        .btn-cancel {
+            color: var(--couleur-punch-fonce);
+            background-color: var(--couleur-principale-pale); /* Jaune-Vert Néon */
+        }
+
+        .btn-cancel:hover {
+            background-color: var(--couleur-principale-fonce); /* Rouge */
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 var(--couleur-punch-fonce);
+        }
+
+        /* Bouton Confirmer */
+        .btn-confirm {
+            color: #fff;
+            background-color: var(--couleur-principale-fonce); /* Rouge Principal */
+        }
+
+        .btn-confirm:hover {
+            background-color: var(--couleur-punch-fonce); /* Marron Foncé */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 var(--couleur-principale-pale); /* Ombre Jaune-Vert */
+        }
+    </style>
+</head>
+<body>
+    <div class="confirmation-box">
+        <h1>Confirmation de votre commande</h1>
+        
+        <div class="section">
+            <h3>Informations client</h3>
+            <div class="info-line">
+                <span class="label">Nom :</span>
+                <span class="value">{{ commande.nom }} {{ commande.prenom }}</span>
+            </div>
+            <div class="info-line">
+                <span class="label">Téléphone :</span>
+                <span class="value">{{ commande.telephone }}</span>
+            </div>
+            <div class="info-line">
+                <span class="label">Adresse de livraison :</span>
+                <span class="value">{{ commande.adresse }}</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Votre pizza</h3>
+            <div class="info-line">
+                <span class="label">Croûte :</span>
+                <span class="value">{{ commande.croute.nom }}</span>
+            </div>
+            <div class="info-line">
+                <span class="label">Sauce :</span>
+                <span class="value">{{ commande.sauce.nom }}</span>
+            </div>
+            <div class="info-line">
+                <span class="label">Garnitures :</span>
+                <div>
+                    {% if commande.garnitures %}
+                        {% for garniture in commande.garnitures %}
+                            <span class="garniture-item">{{ garniture.nom }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="value">Aucune garniture</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <form action="{{ url_for('commander') }}" method="POST">
+            <!-- Champs cachés pour transmettre les données source : Claude.ai -->
+            <input type="hidden" name="nom" value="{{ commande.nom }}">
+            <input type="hidden" name="prenom" value="{{ commande.prenom }}">
+            <input type="hidden" name="telephone" value="{{ commande.telephone }}">
+            <input type="hidden" name="adresse" value="{{ commande.adresse }}">
+            <input type="hidden" name="croute" value="{{ commande.croute.id }}">
+            <input type="hidden" name="sauce" value="{{ commande.sauce.id }}">
+            
+            {% for garniture in commande.garnitures %}
+                <input type="hidden" name="garniture{{ loop.index }}" value="{{ garniture.id }}">
+            {% endfor %}
+            
+            <div class="buttons">
+                <button type="button" class="btn-cancel" onclick="history.back()">
+                    ← Modifier
+                </button>
+                <button type="submit" class="btn-confirm">
+                    Confirmer la commande ✓
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

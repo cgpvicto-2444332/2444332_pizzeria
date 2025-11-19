@@ -74,6 +74,14 @@ CREATE TABLE attente_livraisons (
 
 
 
+INSERT INTO clients (nom, prenom, numero_telephone)
+	VALUES 
+		('Price', 'Carey', '819-999-9999');
+        
+INSERT INTO commandes (id_client, date_commande, adresse)
+	VALUES 
+		(1, now(), '12 Rue Dupré, Montréal, Québec');
+
 INSERT INTO croutes (type_croute)
 	VALUES 
 		('Classique'),
@@ -101,3 +109,13 @@ INSERT INTO garnitures (nom_garniture)
         ('Piments forts');	
         #Pepperoni, Champignons, Oignons, Poivrons, Olives, Anchois, Bacon, Poulet, Maïs, Fromage, Piments forts
 	
+INSERT INTO pizzas (id_commande, id_croute, id_sauce)
+	VALUES
+		(1, 2, 2);
+        
+# PEPPERONI, OIGNONS, ANCHOIS
+INSERT INTO garnitures_pizzas (id_pizza, id_garniture)
+	VALUES
+		(1,1),
+        (1,3),
+        (1,6);

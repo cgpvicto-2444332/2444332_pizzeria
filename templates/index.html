@@ -5,61 +5,84 @@
     <title>Connectez-vous</title>
   </head>
   <style>
-:root {
-    --couleur-principale-fonce: #ff0000;
-    --couleur-principale-pale: #d8ff00;
-    --couleur-principale-tres-pale: #ff00d5;
-    --couleur-secondaire-fonce: #ffa900;
-    --couleur-secondaire-pale: #e3ff00;
-    --couleur-punch-fonce: #7e1b33;
-    --couleur-punch-pale: #ff00d5;
-}
+        :root {
+            --couleur-principale-fonce: #ff0000;
+            --couleur-principale-pale: #d8ff00;
+            --couleur-principale-tres-pale: #ff00d5;
+            --couleur-secondaire-fonce: #ffa900;
+            --couleur-secondaire-pale: #e3ff00;
+            --couleur-punch-fonce: #7e1b33;
+            --couleur-punch-pale: #ff00d5;
+        }
 
-html {
-    background-color: var(--couleur-secondaire-pale);
-}
+        html {
+            background-color: var(--couleur-secondaire-pale);
+        }
 
-.formulaire {
-    background-color: var(--couleur-secondaire-pale);
-}
+        .formulaire {
+            background-color: var(--couleur-secondaire-pale);
+        }
 
-.formulaire form {
-    margin: auto;
-    background-color: var(--couleur-principale-tres-pale);
-    display: flex;
-    flex-direction: column;
-    width: 97%;
-    padding: 20px;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
-    border-radius: 12px;
-}
+        .formulaire form {
+            margin: auto;
+            background-color: var(--couleur-principale-tres-pale);
+            display: flex;
+            flex-direction: column;
+            width: 97%;
+            padding: 20px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+        }
 
-.formulaire input, select, textarea, .boutton-formulaire {
-    font-size: 16px;
-    padding: 8px;
-    margin-top: 5px;
-    border-radius: 4px;
-}
+        .formulaire input, select, textarea, .boutton-formulaire {
+            font-size: 16px;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
 
-.boutton-formulaire {
-    margin-top: 15px;
-    padding: 10px;
-    font-size: 18px;
-    color: #fff;
-    background-color: var(--couleur-principale-fonce);
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
+        .boutton-formulaire {
+            margin-top: 15px;
+            padding: 10px;
+            font-size: 18px;
+            color: #fff;
+            background-color: var(--couleur-principale-fonce);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
 
-.boutton-formulaire:hover {
-    background-color: #2f8f00;
-}
+        .boutton-formulaire:hover {
+            background-color: #2f8f00;
+        }
+
+        .boutton-header {
+            display: inline-block; 
+            text-decoration: none; 
+            text-align: center; 
+            margin-top: 15px; 
+            padding: 10px;
+            font-size: 18px;
+            color: #fff; 
+            background-color: var(--couleur-principale-fonce); 
+            border: none;
+            border-radius: 4px; 
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .boutton-header:hover {
+            background-color: #2f8f00;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
   </style>
   <body>
+    <a class="boutton-header" href="{{ url_for('commandes_en_attente') }}" class="boutton-header">
+            Voir les commandes en attente
+    </a>
     <div id="formulaire-commande" class="formulaire">
         <h1>Formulaire de commande</h1>
-        <form action="/commander" method="POST">
+        <form action="{{ url_for('confirmation') }}" method="POST">
             
             <label for="nom">Nom de famille :</label> <br>
             <input type="text" id="nom" name="nom" required> <br>
@@ -74,14 +97,14 @@ html {
             <input type="text" id="adresse" name="adresse"> <br> 
 
             <label for="croute">Type de croutes :</label> <br>
-            <select id="id" name="type_croute" autofocus>
+            <select id="id" name="croute" autofocus>
                 {% for id, type_croute in croutes %}
                 <option value="{{ id }}">{{ type_croute }}</option>
                 {% endfor %}
             </select> <br>
 
             <label for="sauce">Type de sauce :</label> <br>
-            <select id="id" name="nom_sauce" autofocus>
+            <select id="id" name="sauce" autofocus>
                 {% for id, nom_sauce in sauces %}
                 <option value="{{ id }}">{{ nom_sauce }}</option>
                 {% endfor %}

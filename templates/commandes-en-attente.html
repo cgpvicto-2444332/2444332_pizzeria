@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commandes en attente</title>
+    <!-- CSS fait par moi avec l'aide de Gemini AI pour une beauté maximale -->
+    <style>
+        :root {
+            --couleur-principale-fonce: #ff0000;
+            --couleur-principale-pale: #d8ff00;
+            --couleur-principale-tres-pale: #ff00d5;
+            --couleur-secondaire-fonce: #ffa900;
+            --couleur-secondaire-pale: #e3ff00;
+            --couleur-punch-fonce: #7e1b33;
+            --couleur-punch-pale: #ff00d5;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            background-color: var(--couleur-secondaire-pale); 
+            color: #333; 
+        }
+
+        .header {
+            background-color: var(--couleur-principale-fonce); 
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px var(--couleur-punch-fonce); 
+        }
+
+        .boutton-retour {
+            display: inline-block; 
+            text-decoration: none; 
+            text-align: center; 
+            margin-top: 15px; 
+            padding: 10px 20px;
+            font-size: 18px;
+            color: #fff; 
+            background-color: var(--couleur-punch-fonce); 
+            border: none;
+            border-radius: 4px; 
+            cursor: pointer;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 0 var(--couleur-punch-pale);
+        }
+
+        .boutton-retour:hover {
+            background-color: #2f8f00;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .tableau {
+            max-width: 95%;
+            margin: 0 auto;
+            overflow-x: auto; 
+            padding: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        thead {
+            background-color: var(--couleur-secondaire-fonce);
+            color: var(--couleur-punch-fonce); 
+        }
+
+        th {
+            padding: 15px 10px;
+            text-align: left;
+            font-size: 1.1em;
+            border-bottom: 3px solid var(--couleur-principale-fonce); 
+        }
+
+        tbody {
+            background-color: var(--couleur-principale-tres-pale);
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px dashed var(--couleur-principale-fonce);
+            color: #000; /* Texte noir */
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--couleur-punch-pale); 
+        }
+
+        tbody tr:hover {
+            background-color: var(--couleur-principale-pale); 
+            color: #000;
+            cursor: default;
+        }
+
+        .message-vide {
+            text-align: center;
+            padding: 40px;
+            margin-top: 30px;
+            background-color: var(--couleur-principale-tres-pale); 
+            border: 5px dashed var(--couleur-principale-fonce); 
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .message-vide p {
+            font-size: 1.5em;
+            color: var(--couleur-punch-fonce);
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Commandes de Pizza en Attente</h1>
+        <a href="{{ url_for('index') }}" class="boutton-retour">
+            ← Nouvelle Commande
+        </a>
+    </div>
+
+    <div class="tableau">
+        {% if commandes %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Commande</th>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Téléphone</th>
+                    <th>Adresse</th>
+                    <th>Croûte</th>
+                    <th>Sauce</th>
+                    <th>Garnitures</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cmd in commandes %}
+                <tr>
+                    <td>#{{ cmd[0] }}</td>
+                    <td>{{ cmd[1].strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ cmd[4] }} {{ cmd[3] }}</td>
+                    <td>{{ cmd[5] }}</td>
+                    <td>{{ cmd[2] }}</td>
+                    <td>{{ cmd[6] }}</td>
+                    <td>{{ cmd[7] }}</td>
+                    <td>{{ cmd[8] if cmd[8] else 'Aucune' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="message-vide">
+            <p>Aucune commande n'a été trouvée pour le moment.</p>
+            <p>Passez la première !</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
