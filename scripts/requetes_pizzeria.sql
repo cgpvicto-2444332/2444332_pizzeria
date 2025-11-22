@@ -1,10 +1,13 @@
-use pizzeria;
+use pizzeria_2444332;
 select * from clients;
 select * from commandes;
 select * from pizzas;
 SELECT * FROM garnitures;
 SELECT * FROM croutes;
 SELECT * FROM sauces;
+select * from attente_livraisons;
+
+DELETE FROM attente_livraisons WHERE id_commande = 2;
 
 # Requête qui affiche toutes les informations nécessaires pour vérification
 SELECT 
@@ -41,7 +44,8 @@ SELECT
 	cr.type_croute,
 	s.nom_sauce,
 	GROUP_CONCAT(g.nom_garniture SEPARATOR ', ') as garnitures
-FROM commandes cmd
+FROM attente_livraisons al
+JOIN commandes cmd ON al.id_commande = cmd.id
 JOIN clients cl ON cmd.id_client = cl.id
 JOIN pizzas p ON p.id_commande = cmd.id
 JOIN croutes cr ON p.id_croute = cr.id
@@ -49,4 +53,4 @@ JOIN sauces s ON p.id_sauce = s.id
 LEFT JOIN garnitures_pizzas gp ON gp.id_pizza = p.id
 LEFT JOIN garnitures g ON gp.id_garniture = g.id
 GROUP BY cmd.id, cmd.date_commande, cmd.adresse, cl.nom, cl.prenom, cl.numero_telephone, cr.type_croute, s.nom_sauce
-ORDER BY cmd.date_commande DESC
+ORDER BY cmd.date_commande

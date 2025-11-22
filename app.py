@@ -1,8 +1,9 @@
 import os
 from dotenv import load_dotenv
 import mysql.connector
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from datetime import datetime
+from mysql.connector import Error
 
 app = Flask(__name__)
 
@@ -24,6 +25,28 @@ def db_config():
         database=db_name,
         port=db_port
 )
+
+@app.route('/api/client/<int:client_id>')
+def get_client(client_id):
+    db = db_config()
+    if db is None:
+        return jsonify({'error': 'Erreur de connexion à la base de données'}), 500
+        
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT id, nom, prenom, numero_telephone FROM clients WHERE id = %s", (client_id,))
+        client = cursor.fetchone()
+        
+        if client:
+            return jsonify(client)
+        else:
+            return jsonify({'error': 'Client non trouvée'}), 404
+    except Error as e:
+        print(f"Oups, erreur avec la requête SQL: {e}")
+        return jsonify({'error': 'Erreur interne du serveur'}), 500
+    finally:
+        cursor.close()
+        db.close()
 
 @app.route('/')
 def index():
@@ -51,7 +74,6 @@ def index():
 def confirmation():
     # Connexion à la base de données
     db = db_config()
-    cursor = db.cursor()
     
     # Récupérer les données du formulaire
     nom = request.form['nom']
@@ -69,18 +91,23 @@ def confirmation():
     garnitures_ids = [g for g in [garniture1, garniture2, garniture3, garniture4] if g]
     
     # Récupérer le nom de la croûte depuis la base de données
+    cursor = db.cursor()
     sql_croute = "SELECT type_croute FROM croutes WHERE id = %s"
     cursor.execute(sql_croute, (croute_id,))
     croute_result = cursor.fetchone()
     croute_nom = croute_result[0] if croute_result else "Non trouvée"
+    cursor.close()
     
     # Récupérer le nom de la sauce depuis la base de données
+    cursor = db.cursor()
     sql_sauce = "SELECT nom_sauce FROM sauces WHERE id = %s"
     cursor.execute(sql_sauce, (sauce_id,))
     sauce_result = cursor.fetchone()
     sauce_nom = sauce_result[0] if sauce_result else "Non trouvée"
+    cursor.close()
     
     # Récupérer les noms des garnitures depuis la base de données
+    cursor = db.cursor()
     garnitures_details = []
     for garniture_id in garnitures_ids:
         if garniture_id:
@@ -96,9 +123,9 @@ def confirmation():
                     'id': garniture_id,
                     'nom': nom_garniture
                 })
+    cursor.close()
     
     # Fermeture du curseur et de la connexion
-    cursor.close()
     db.close()
     
     # Préparer les données de la commande pour l'affichage
@@ -190,9 +217,8 @@ def commander():
                 cursor.close()
             if db:
                 db.close()
-    
-    # Si GET, afficher le formulaire
-    return render_template('index.html')
+
+    return redirect(url_for('index'))
 
 @app.route('/commandes_en_attente')
 def commandes_en_attente():
@@ -211,7 +237,8 @@ def commandes_en_attente():
             cr.type_croute,
             s.nom_sauce,
             GROUP_CONCAT(g.nom_garniture SEPARATOR ', ') as garnitures
-        FROM commandes cmd
+        FROM attente_livraisons al
+        JOIN commandes cmd ON al.id_commande = cmd.id
         JOIN clients cl ON cmd.id_client = cl.id
         JOIN pizzas p ON p.id_commande = cmd.id
         JOIN croutes cr ON p.id_croute = cr.id
@@ -229,6 +256,35 @@ def commandes_en_attente():
     db.close()
     
     return render_template('commandes-en-attente.html', commandes=commandes)
+
+@app.route('/livrer/<int:commande_id>', methods=['POST'])
+def livrer(commande_id):
+    db = db_config()
+    cursor = db.cursor()
+    
+    try:
+        sql = "DELETE FROM attente_livraisons WHERE id_commande = %s"
+        cursor.execute(sql, (commande_id,))
+        db.commit()
+        
+        cursor.close()
+        db.close()
+        
+        # Rediriger vers la page des commandes en attente
+        # redirect pour faire afficher la page et non le template
+        return redirect(url_for('commandes_en_attente'))
+        
+    except mysql.connector.Error as err:
+        db.rollback()
+        cursor.close()
+        db.close()
+        return f"Erreur lors de la livraison : {err}", 500
+    
+    finally:
+            if cursor:
+                cursor.close()
+            if db:
+                db.close()
 
 if __name__ == '__main__':
     app.run(debug=True)

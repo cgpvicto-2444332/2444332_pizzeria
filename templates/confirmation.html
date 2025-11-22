@@ -199,7 +199,7 @@
             </div>
         </div>
 
-        <form action="{{ url_for('commander') }}" method="POST">
+        <form action="/commander" method="POST">
             <!-- Champs cachés pour transmettre les données source : Claude.ai -->
             <input type="hidden" name="nom" value="{{ commande.nom }}">
             <input type="hidden" name="prenom" value="{{ commande.prenom }}">

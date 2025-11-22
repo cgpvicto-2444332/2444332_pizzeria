@@ -1,15 +1,15 @@
 /*
 * Le script qui crée la structure de la base de données
 *
-* Fichier : MathieuDidier_pizzeria.sql
+* Fichier : init_bd.sql
 * Auteur : Didier Mathieu
 * Langage : SQL
 * Date : 2025-11-12
 */
-DROP DATABASE IF EXISTS pizzeria;
-CREATE DATABASE pizzeria;
+DROP DATABASE IF EXISTS pizzeria_2444332;
+CREATE DATABASE pizzeria_2444332;
 
-USE pizzeria;
+USE pizzeria_2444332;
 
 CREATE TABLE clients (
 	id INT PRIMARY KEY AUTO_INCREMENT,
@@ -119,3 +119,38 @@ INSERT INTO garnitures_pizzas (id_pizza, id_garniture)
 		(1,1),
         (1,3),
         (1,6);
+        
+INSERT INTO attente_livraisons (id_commande)
+	VALUES
+		(1);
+        
+
+
+
+/*******************************************************************************/
+/****************************  Triggers  ***************************************/
+/*******************************************************************************/
+
+
+
+DELIMITER $$
+# Trigger pour ajouter les commandes automatiquement en attente livraison
+CREATE TRIGGER commande_attente_livraison
+    AFTER INSERT
+    ON commandes FOR EACH ROW
+    BEGIN
+		INSERT INTO attente_livraisons (id_commande)
+		VALUES (NEW.id);
+    END $$
+    
+# Trigger pour ajouter la date de livraison quand on enleve de la table 
+CREATE TRIGGER date_livraison_commande
+    AFTER DELETE
+    ON attente_livraisons FOR EACH ROW
+    BEGIN
+		UPDATE commandes
+        SET date_livraison = NOW()
+        WHERE id = OLD.id_commande;
+    END $$
+
+DELIMITER ;

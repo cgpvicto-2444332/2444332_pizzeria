@@ -2,7 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>Connectez-vous</title>
+    <title>Commandez!!</title>
   </head>
   <style>
         :root {
@@ -77,41 +77,49 @@
         }
   </style>
   <body>
-    <a class="boutton-header" href="{{ url_for('commandes_en_attente') }}" class="boutton-header">
+    <a class="boutton-header" href="/commandes_en_attente" class="boutton-header">
             Voir les commandes en attente
     </a>
     <div id="formulaire-commande" class="formulaire">
         <h1>Formulaire de commande</h1>
-        <form action="{{ url_for('confirmation') }}" method="POST">
+        <form action="/confirmation" method="POST">
+
+            <div>
+                <label for="nom">Utilisateur existant :</label> <br>
+                <input type="text" id="champId" placeholder="Entrez l'ID du client...">
+                <button id="boutonRechercher" onclick="recupererDonneesClient()">Rechercher</button>
+            </div> <br>
             
             <label for="nom">Nom de famille :</label> <br>
-            <input type="text" id="nom" name="nom" required> <br>
+            <input type="text" id="nom" name="nom" autofocus required> <br>
 
             <label for="prenom">Prénom :</label> <br>
             <input type="text" id="prenom" name="prenom" required> <br>
 
             <label for="telephone">Numéro de téléphone :</label> <br>
-            <input type="text" id="telephone" name="telephone"> <br>
+            <input type="text" id="telephone" name="telephone" required> <br>
 
             <label for="adresse">Adresse :</label> <br>
-            <input type="text" id="adresse" name="adresse"> <br> 
+            <input type="text" id="adresse" name="adresse" required> <br> 
 
             <label for="croute">Type de croutes :</label> <br>
-            <select id="id" name="croute" autofocus>
+            <select id="id" name="croute" required>
+                <option value=''>Choisissez une croute</option>
                 {% for id, type_croute in croutes %}
                 <option value="{{ id }}">{{ type_croute }}</option>
                 {% endfor %}
             </select> <br>
 
             <label for="sauce">Type de sauce :</label> <br>
-            <select id="id" name="sauce" autofocus>
+            <select id="id" name="sauce" required>
+                <option value=''>Choisissez une sauce</option>
                 {% for id, nom_sauce in sauces %}
                 <option value="{{ id }}">{{ nom_sauce }}</option>
                 {% endfor %}
             </select> <br>
 
             <label for="garniture1">Type de garnitures :</label> <br>
-            <select id="id" name="garniture1" autofocus>
+            <select id="id" name="garniture1">
                 <option value=''>Choisissez une garniture</option>
                 {% for id, nom_garniture in garnitures %}
                 <option value="{{ id }}">{{ nom_garniture }}</option>
@@ -119,7 +127,7 @@
             </select> <br>
 
             <label for="garniture2">Type de garnitures :</label> <br>
-            <select id="id" name="garniture2" autofocus>
+            <select id="id" name="garniture2">
                 <option value=''>Choisissez une garniture</option>
                 {% for id, nom_garniture in garnitures %}
                 <option value="{{ id }}">{{ nom_garniture }}</option>
@@ -127,7 +135,7 @@
             </select> <br>
             
             <label for="garniture3">Type de garnitures :</label> <br>
-            <select id="id" name="garniture3" autofocus>
+            <select id="id" name="garniture3">
                 <option value=''>Choisissez une garniture</option>
                 {% for id, nom_garniture in garnitures %}
                 <option value="{{ id }}">{{ nom_garniture }}</option>
@@ -135,7 +143,7 @@
             </select> <br>
 
             <label for="garniture4">Type de garnitures :</label> <br>
-            <select id="id" name="garniture4" autofocus>
+            <select id="id" name="garniture4">
                 <option value=''>Choisissez une garniture</option>
                 {% for id, nom_garniture in garnitures %}
                 <option value="{{ id }}">{{ nom_garniture }}</option>
@@ -146,5 +154,53 @@
             
         </form>
     </div>
+    <script>
+        const champId = document.getElementById('champId');
+        const champNom = document.getElementById('nom');
+        const champPrenom = document.getElementById('prenom');
+        const champTelephone = document.getElementById('telephone');
+
+        function reinitialiserFormulaire() {
+            champNom.value = '';
+            champPrenom.value = '';
+            champTelephone.value = '';
+            champNom.readOnly = false;
+            champPrenom.readOnly = false;
+            champTelephone.readOnly = false;
+        }
+
+        async function recupererDonneesClient() {
+            const id = champId.value.trim();
+            reinitialiserFormulaire();
+
+            if (!id) {
+                alert("Oublie pas d'entrer un ID !");
+                return;
+            }
+
+            try {
+                const reponse = await fetch(`/api/client/${id}`);
+                
+                if (reponse.ok) {
+                    const donnees = await reponse.json();
+                    champNom.value = donnees.nom;
+                    champPrenom.value = donnees.prenom;
+                    champTelephone.value = donnees.numero_telephone;
+                    champNom.readOnly = true;
+                    champPrenom.readOnly = true;
+                    champTelephone.readOnly = true;
+                } else if (reponse.status === 404) {
+                    alert("Désolé, on n'a pas trouvé de client avec cet ID-là.");
+                } else {
+                    throw new Error(`Erreur du serveur: ${reponse.status}`);
+                }
+            } catch (erreur) {
+                console.error('Erreur pendant la recherche:', erreur);
+                alert("Il y a eu un problème de communication avec le serveur.");
+            }
+        }
+
+        reinitialiserFormulaire();
+    </script>
   </body>
 </html>
