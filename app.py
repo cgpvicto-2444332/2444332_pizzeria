@@ -189,14 +189,12 @@ def commander():
             values = (client_id, date_commande, adresse)
 
             cursor.execute(sqlCommande, values)
-            db.commit()
             commande_id = cursor.lastrowid
 
             sqlPizza = "INSERT INTO pizzas (id_commande, id_croute, id_sauce) VALUES (%s, %s, %s)"
             values = (commande_id, croute, sauce)
 
             cursor.execute(sqlPizza, values)
-            db.commit()
             pizza_id = cursor.lastrowid
 
             if garnitures:
