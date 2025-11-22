@@ -1,3 +1,13 @@
+/*
+* Un script test qui vérifie la présence de données dans les tables
+* et dans lequel je peux expérimenter des select pour l'appli FLASK
+*
+* Fichier : requetes_pizzeria.sql
+* Auteur : Didier Mathieu
+* Langage : SQL
+* Date : 2025-11-12
+*/
+
 use pizzeria_2444332;
 select * from clients;
 select * from commandes;
@@ -50,7 +60,7 @@ JOIN clients cl ON cmd.id_client = cl.id
 JOIN pizzas p ON p.id_commande = cmd.id
 JOIN croutes cr ON p.id_croute = cr.id
 JOIN sauces s ON p.id_sauce = s.id
-LEFT JOIN garnitures_pizzas gp ON gp.id_pizza = p.id
+LEFT JOIN garnitures_pizzas gp ON gp.id_pizza = p.id # Left join pour les pizzas sans garnitures
 LEFT JOIN garnitures g ON gp.id_garniture = g.id
 GROUP BY cmd.id, cmd.date_commande, cmd.adresse, cl.nom, cl.prenom, cl.numero_telephone, cr.type_croute, s.nom_sauce
 ORDER BY cmd.date_commande

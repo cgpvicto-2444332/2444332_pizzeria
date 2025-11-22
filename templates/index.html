@@ -75,6 +75,18 @@
             background-color: #2f8f00;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
+
+        .erreur-message {
+            color: darkred; 
+            font-size: 0.85em;
+            margin-top: -5px; 
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .formulaire input, select, textarea {
+            margin-bottom: 10px;
+        }
   </style>
   <body>
     <a class="boutton-header" href="/commandes_en_attente" class="boutton-header">
@@ -82,74 +94,81 @@
     </a>
     <div id="formulaire-commande" class="formulaire">
         <h1>Formulaire de commande</h1>
-        <form action="/confirmation" method="POST">
+        <form action="/confirmation" method="POST" id="formulaireCommande">
 
             <div>
                 <label for="nom">Utilisateur existant :</label> <br>
                 <input type="text" id="champId" placeholder="Entrez l'ID du client...">
-                <button id="boutonRechercher" onclick="recupererDonneesClient()">Rechercher</button>
+                <button id="boutonRechercher" class="boutton-header" onclick="recupererDonneesClient()">Rechercher client</button>
             </div> <br>
-            
-            <label for="nom">Nom de famille :</label> <br>
-            <input type="text" id="nom" name="nom" autofocus required> <br>
 
             <label for="prenom">Prénom :</label> <br>
-            <input type="text" id="prenom" name="prenom" required> <br>
+            <input type="text" id="prenom" name="prenom" autofocus required> 
+            <div id="erreur-prenom" class="erreur-message"></div><br>
+            
+            <label for="nom">Nom de famille :</label> <br>
+            <input type="text" id="nom" name="nom" required>
+            <div id="erreur-nom" class="erreur-message"></div> <br>
 
             <label for="telephone">Numéro de téléphone :</label> <br>
-            <input type="text" id="telephone" name="telephone" required> <br>
+            <input type="text" id="telephone" name="telephone" placeholder="Ex: 999-999-9999" required> 
+            <div id="erreur-telephone" class="erreur-message"></div><br>
 
             <label for="adresse">Adresse :</label> <br>
-            <input type="text" id="adresse" name="adresse" required> <br> 
+            <input type="text" id="adresse" name="adresse" placeholder="Ex: 12 Rue Dupré, Montréal, Québec" required> 
+            <div id="erreur-adresse" class="erreur-message"></div><br> 
 
             <label for="croute">Type de croutes :</label> <br>
-            <select id="id" name="croute" required>
+            <select id="id-croute" name="croute" required>
                 <option value=''>Choisissez une croute</option>
                 {% for id, type_croute in croutes %}
                 <option value="{{ id }}">{{ type_croute }}</option>
                 {% endfor %}
-            </select> <br>
+            </select> 
+            <div id="erreur-croute" class="erreur-message"></div><br>
 
             <label for="sauce">Type de sauce :</label> <br>
-            <select id="id" name="sauce" required>
+            <select id="id-sauce" name="sauce" required>
                 <option value=''>Choisissez une sauce</option>
                 {% for id, nom_sauce in sauces %}
                 <option value="{{ id }}">{{ nom_sauce }}</option>
                 {% endfor %}
-            </select> <br>
+            </select> 
+            <div id="erreur-sauce" class="erreur-message"></div><br>
 
             <label for="garniture1">Type de garnitures :</label> <br>
-            <select id="id" name="garniture1">
+            <select id="id-garniture1" name="garniture1">
                 <option value=''>Choisissez une garniture</option>
                 {% for id, nom_garniture in garnitures %}
                 <option value="{{ id }}">{{ nom_garniture }}</option>
                 {% endfor %}
-            </select> <br>
+            </select><br>
 
             <label for="garniture2">Type de garnitures :</label> <br>
-            <select id="id" name="garniture2">
+            <select id="id-garniture1" name="garniture2">
                 <option value=''>Choisissez une garniture</option>
                 {% for id, nom_garniture in garnitures %}
                 <option value="{{ id }}">{{ nom_garniture }}</option>
                 {% endfor %}
-            </select> <br>
+            </select><br>
             
             <label for="garniture3">Type de garnitures :</label> <br>
-            <select id="id" name="garniture3">
+            <select id="id-garniture1" name="garniture3">
                 <option value=''>Choisissez une garniture</option>
                 {% for id, nom_garniture in garnitures %}
                 <option value="{{ id }}">{{ nom_garniture }}</option>
                 {% endfor %}
-            </select> <br>
+            </select><br>
 
             <label for="garniture4">Type de garnitures :</label> <br>
-            <select id="id" name="garniture4">
+            <select id="id-garniture1" name="garniture4">
                 <option value=''>Choisissez une garniture</option>
                 {% for id, nom_garniture in garnitures %}
                 <option value="{{ id }}">{{ nom_garniture }}</option>
                 {% endfor %}
-            </select> <br>
-            
+            </select><br>
+
+            <div id="erreur-doublon-garniture" class="erreur-message"></div> <br>
             <button class="boutton-formulaire" type="submit">Commander</button>
             
         </form>
@@ -159,6 +178,23 @@
         const champNom = document.getElementById('nom');
         const champPrenom = document.getElementById('prenom');
         const champTelephone = document.getElementById('telephone');
+
+        const champAdresse = document.getElementById('adresse'); 
+        const selectCroute = document.querySelector('select[name="croute"]');
+        const selectSauce = document.querySelector('select[name="sauce"]');
+        const selectGarnitures = document.querySelectorAll('select[name^="garniture"]');
+
+        const erreurNom = document.getElementById('erreur-nom');
+        const erreurPrenom = document.getElementById('erreur-prenom');
+        const erreurTelephone = document.getElementById('erreur-telephone');
+        const erreurAdresse = document.getElementById('erreur-adresse');
+        const erreurCroute = document.getElementById('erreur-croute');
+        const erreurSauce = document.getElementById('erreur-sauce');
+        const erreurDoublonGarniture = document.getElementById('erreur-doublon-garniture');
+
+        const formulaire = document.getElementById('formulaireCommande');
+        const regexTelephone = /^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/;
+        const regexAdresse = /^\d+\s+.+,\s*.+,\s*.+$/i; 
 
         function reinitialiserFormulaire() {
             champNom.value = '';
@@ -189,6 +225,7 @@
                     champNom.readOnly = true;
                     champPrenom.readOnly = true;
                     champTelephone.readOnly = true;
+                    cacherErreurs();
                 } else if (reponse.status === 404) {
                     alert("Désolé, on n'a pas trouvé de client avec cet ID-là.");
                 } else {
@@ -200,7 +237,80 @@
             }
         }
 
+        function cacherErreurs() {
+            document.querySelectorAll('.erreur-message').forEach(element => {
+                element.textContent = '';
+                element.style.display = 'none';
+            });
+        }
+
+        function afficherErreur(elementErreur, message) {
+            elementErreur.textContent = message;
+            elementErreur.style.display = 'block';
+        }
+
+        function validerFormulaire(event) {
+            cacherErreurs(); 
+
+            let estValide = true;
+
+            if (champNom.value.trim() === '') {
+                afficherErreur(erreurNom, "Le Nom de famille ne peut pas être vide.");
+                estValide = false;
+            }
+            if (champPrenom.value.trim() === '') {
+                afficherErreur(erreurPrenom, "Le Prénom ne peut pas être vide.");
+                estValide = false;
+            }
+            if (champTelephone.value.trim() === '') {
+                afficherErreur(erreurTelephone, "Le Numéro de téléphone ne peut pas être vide.");
+                estValide = false;
+            } else if (!regexTelephone.test(champTelephone.value.trim())) {
+                afficherErreur(erreurTelephone, "Le Numéro de téléphone n'est pas dans un format valide (ex: 819-555-1234).");
+                estValide = false;
+            }
+
+            if (champAdresse.value.trim() === '') {
+                afficherErreur(erreurAdresse, "L'Adresse ne peut pas être vide.");
+                estValide = false;
+            } else if (!regexAdresse.test(champAdresse.value.trim())) {
+                afficherErreur(erreurAdresse, "L'Adresse doit être au format : Numéro Rue, Ville, Province.");
+                estValide = false;
+            }
+
+            if (selectCroute.value === '') {
+                afficherErreur(erreurCroute, "Veuillez choisir un Type de croute.");
+                estValide = false;
+            }
+            if (selectSauce.value === '') {
+                afficherErreur(erreurSauce, "Veuillez choisir un Type de sauce.");
+                estValide = false;
+            }
+
+            const choixGarnitures = [];
+            selectGarnitures.forEach(select => {
+                if (select.value !== '') {
+                    choixGarnitures.push(select.value);
+                }
+            });
+            
+            // Utilise un Set pour identifier les doublons (https://gemini.google.com/)
+            const garnituresUniques = new Set(choixGarnitures);
+            
+            if (choixGarnitures.length !== garnituresUniques.size) {
+                // Un doublon a été trouvé
+                afficherErreur(erreurDoublonGarniture, "Attention : Vous ne pouvez pas sélectionner la même garniture plus d'une fois.");
+                estValide = false;
+            }
+            
+            if (!estValide) {
+                event.preventDefault(); 
+            }
+        }
+
+        formulaire.addEventListener('submit', validerFormulaire);
         reinitialiserFormulaire();
+        cacherErreurs();
     </script>
   </body>
 </html>

@@ -11,6 +11,12 @@ CREATE DATABASE pizzeria_2444332;
 
 USE pizzeria_2444332;
 
+
+/*******************************************************************************/
+/************************* Création des tables *********************************/
+/*******************************************************************************/
+
+
 CREATE TABLE clients (
 	id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(50) NOT NULL,
@@ -67,16 +73,43 @@ CREATE TABLE attente_livraisons (
 );
 
 
+/*******************************************************************************/
+/****************************  Triggers  ***************************************/
+/*******************************************************************************/
+
+
+
+DELIMITER $$
+# Trigger pour ajouter les commandes automatiquement en attente livraison
+CREATE TRIGGER commande_attente_livraison
+    AFTER INSERT
+    ON commandes FOR EACH ROW
+    BEGIN
+		INSERT INTO attente_livraisons (id_commande)
+		VALUES (NEW.id);
+    END $$
+    
+# Trigger pour ajouter la date de livraison quand on enleve de la table 
+CREATE TRIGGER date_livraison_commande
+    AFTER DELETE
+    ON attente_livraisons FOR EACH ROW
+    BEGIN
+		UPDATE commandes
+        SET date_livraison = NOW()
+        WHERE id = OLD.id_commande;
+    END $$
+
+DELIMITER ;
+
 
 /*******************************************************************************/
 /**************************** Insertions ***************************************/
 /*******************************************************************************/
 
 
-
 INSERT INTO clients (nom, prenom, numero_telephone)
 	VALUES 
-		('Price', 'Carey', '819-999-9999');
+		('Price', 'Carey', '999-999-9999');
         
 INSERT INTO commandes (id_client, date_commande, adresse)
 	VALUES 
@@ -119,38 +152,3 @@ INSERT INTO garnitures_pizzas (id_pizza, id_garniture)
 		(1,1),
         (1,3),
         (1,6);
-        
-INSERT INTO attente_livraisons (id_commande)
-	VALUES
-		(1);
-        
-
-
-
-/*******************************************************************************/
-/****************************  Triggers  ***************************************/
-/*******************************************************************************/
-
-
-
-DELIMITER $$
-# Trigger pour ajouter les commandes automatiquement en attente livraison
-CREATE TRIGGER commande_attente_livraison
-    AFTER INSERT
-    ON commandes FOR EACH ROW
-    BEGIN
-		INSERT INTO attente_livraisons (id_commande)
-		VALUES (NEW.id);
-    END $$
-    
-# Trigger pour ajouter la date de livraison quand on enleve de la table 
-CREATE TRIGGER date_livraison_commande
-    AFTER DELETE
-    ON attente_livraisons FOR EACH ROW
-    BEGIN
-		UPDATE commandes
-        SET date_livraison = NOW()
-        WHERE id = OLD.id_commande;
-    END $$
-
-DELIMITER ;
